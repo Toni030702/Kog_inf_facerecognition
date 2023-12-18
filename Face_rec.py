@@ -9,16 +9,16 @@ face_detection = mp_face_detection.FaceDetection(min_detection_confidence=0.3)
 mp_face_mesh = mp.solutions.face_mesh
 face_mesh = mp_face_mesh.FaceMesh()
 
-# Funkcija za obradu slike ili videa
-def process_image_or_video(input_path, output_path=None, is_video=False):
-    if is_video:
-        cap = cv2.VideoCapture(input_path)
+# Funkcija za obradu slike ili videa s kamerom
+def process_image_or_video(input_path=None, output_path=None, is_video=False):
+    if is_video or input_path is None:  # Koristi kameru za video ili ako nije specificiran ulazni put
+        cap = cv2.VideoCapture(0)
         if not cap.isOpened():
             print("Greska")
             return
     else:
-        img = cv2.imread(input_path)
-        if img is None:
+        cap = cv2.VideoCapture(input_path)
+        if not cap.isOpened():
             print("Greska")
             return
 
@@ -28,12 +28,9 @@ def process_image_or_video(input_path, output_path=None, is_video=False):
 
     # Obrada frame-ova
     while True:
-        if is_video:
-            ret, frame = cap.read()
-            if not ret:
-                break
-        else:
-            frame = img.copy()
+        ret, frame = cap.read()
+        if not ret:
+            break
 
         # Pretvorba slike u RGB format
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -74,16 +71,11 @@ def process_image_or_video(input_path, output_path=None, is_video=False):
         if cv2.waitKey(1) & 0xFF == 27:  # Esc
             break
 
-    if is_video:
-        cap.release()
+    cap.release()
     if output_path:
         out.release()
     cv2.destroyAllWindows()
 
-# Primjeri korištenja
 
-# Za obradu slike i spremanje rezultata
-process_image_or_video('Images/FR_slika.jpeg')
-
-# Za obradu videa i prikazivanje rezultata
-process_image_or_video("Videos/FR_video.mp4", is_video=True)
+process_image_or_video()
+process_image_or_video(f'Videos/FR_video.mp4')
